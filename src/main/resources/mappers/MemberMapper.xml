@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.Member">
+	
+	<!-- 회원 가입  -->
+	<insert id="insert">
+		<![CDATA[
+		insert into tbl_member
+		values(#{mem_id}, #{mem_pw}, #{mem_name}, #{mem_gender}, #{mem_contact}, 
+		sysdate, #{mem_birth}, null, null, null, null, 0)
+		]]>
+	</insert>
+	
+	<!-- id 중복검사 -->
+	<select id="checkid" resultType="string">
+		select mem_id from tbl_member where mem_id = #{id}
+	</select>
+	
+	<!-- 회원목록(페이지처리포함)  -->
+	<select id="getAmount" resultType="Integer">
+		select count(mem_id) from tbl_member	
+	</select>
+	<select id="getListpage" resultType="ca.project.DTO.MemberDTO">
+		<![CDATA[
+		select rownum, 
+		mem_id, mem_pw, mem_name, mem_gender, mem_contact, mem_regdate, to_char(mem_birth, 'yyyy/mm/dd') mem_birth, mem_address1, mem_address2, mem_address3, mem_email 
+		from (select * from tbl_member order by mem_regdate asc) order by rownum desc
+		]]>
+	</select>
+	
+	<!-- 회원정보 자세히 보기  -->
+	<select id="read" resultType="ca.project.DTO.MemberDTO">
+		<![CDATA[
+		select mem_id, mem_pw, mem_name, mem_gender, mem_contact, mem_regdate, to_char(mem_birth, 'yyyy/mm/dd') mem_birth, mem_address1, mem_address2, mem_address3, mem_email 
+		from tbl_member where mem_id = #{mem_id}
+		]]>
+	</select>
+	
+	<!-- 회원정보 수정하기  -->
+	<update id="update">
+		<![CDATA[
+		update tbl_member 
+		set mem_pw=#{mem_pw}, mem_name=#{mem_name}, mem_gender=#{mem_gender}, mem_contact=#{mem_contact}, mem_address1=#{mem_address1}, mem_address2=#{mem_address2}, mem_address3=#{mem_address3}, mem_email=#{mem_email}
+		where mem_id = #{mem_id}
+		]]>
+	</update>
+	
+	<!-- 회원 삭제  -->
+	<delete id="delete">
+		delete from tbl_member where mem_id = #{mem_id}
+	</delete>
+	
+	<!-- 로그인  -->
+	<select id="login" resultType="ca.project.DTO.MemberDTO">
+		<![CDATA[
+		select * from tbl_member 
+		where mem_id = #{mem_id} and mem_pw = #{mem_pw}
+		]]> 
+	</select>
+	
+	<!--홈페이지에서 장바구니 리스트 가지고 오기  -->
+	<select id="list" resultType="ca.project.DTO.CartVO">
+		select
+		    c.cart_no, c.cart_memId, c.cart_wineCode, cart_amount, c.cart_regdate,
+		    w.wine_name, w.wine_thumbimg, w.wine_price, w.wine_stock
+		from tbl_cart c
+		    inner join tbl_wine w
+		        on c.cart_wineCode = w.wine_code    
+		    where c.cart_memId = #{mem_id} 
+	</select>
+	
+	
+	
+	
+</mapper>

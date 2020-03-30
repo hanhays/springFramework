@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.Order">
+	
+	<!-- 주문 생성 -->
+	<insert id="insert">
+		insert into tbl_order(order_idnumber, 
+			order_no, 
+			order_totalprice, order_regdate, order_memId, order_state, order_cancel)
+		values(#{order_idnumber},
+			(select NVL2(max(order_no), max(order_no)+1, 1) from tbl_order), 
+		 #{order_totalprice}, sysdate, #{order_memId}, 0, 0)
+	</insert>
+	
+	<!-- 주문 상세보기 생성 -->
+	<insert id="insertDetails">
+		insert into tbl_order_details(od_no, od_orderIdnumber, od_wineCode, od_amount)
+		values((select NVL2(max(od_no), max(od_no)+1, 1) from tbl_order_details), #{od_orderIdnumber}, #{od_wineCode}, #{od_amount})
+	</insert>	
+	
+	
+	<!-- 카트비우기  -->
+	<delete id="delete">
+		delete from tbl_cart where cart_memId = #{mem_id}
+	</delete>
+	
+	
+	<!-- 사용자 주문 내역  -->
+	<select id="member_orderlist" resultType="ca.project.DTO.OrderVO">
+		select * from tbl_order 
+			where order_memId = #{mem_id} 
+		    order by order_regdate desc
+	</select>
+	
+	
+	<!-- 사용자 주문내역 상세보기  -->	
+	<select id="read" resultType="ca.project.DTO.OrderDetailsVO">
+		select
+		    od.od_amount,
+		    w.wine_name, w.wine_thumbimg, w.wine_price, w.wine_code
+		from tbl_order_details od
+		    inner join tbl_wine w
+		        on od.od_wineCode = w.wine_code    
+		    where od_orderIdnumber = #{order_idnumber} 
+		    order by od.od_no asc
+	</select>
+	
+	
+	<!-- 관리자가 주문내역보기  -->
+	<select id="admin_orderlist" resultType="ca.project.DTO.OrderVO">
+		select * from tbl_order order by order_regdate desc
+	</select>
+	
+	
+	<!-- 주문취소요청하기 -->
+	<update id="cacel">
+		update tbl_order
+		set order_cancel = 1
+		where order_idnumber = #{order_idnumber}
+	</update>
+	
+	
+	
+	<!-- 배송 하기 -->
+	<update id="shipping">
+		update tbl_order
+		set order_state = 1
+		where order_idnumber = #{order_idnumber}
+	</update>
+	
+	<!-- 재고 업데이트  -->
+	<update id="stockUpdate">
+		update tbl_wine
+		set wine_stock = wine_stock - #{od_amount}
+		where wine_code = #{wine_code}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.R_board_Reply">
+	
+	<!--댓글 쓰기  -->
+	<insert id="insert">
+		<![CDATA[
+			insert into tbl_reviewBoardReply(rpy_no, rpy_bno, rpy_writer, rpy_content)
+			values((select NVL2(max(rpy_no), max(rpy_no)+1, 1) from tbl_reviewBoardReply), #{rpy_bno}, #{rpy_writer}, #{rpy_content})
+		]]>
+	</insert>
+	
+	<!--댓글 삭제하기  -->
+	<select id="read" resultType="ca.project.DTO.R_board_ReplyVO">
+		select * from tbl_reviewBoardReply where rpy_no = #{rpy_no}
+	</select>
+	
+	<delete id="delete">
+		delete from tbl_reviewBoardReply where rpy_no = #{rpy_no}
+	</delete>
+	
+	
+</mapper>

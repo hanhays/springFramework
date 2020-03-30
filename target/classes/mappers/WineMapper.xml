@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.Wine">
+	
+	<!--상품 등록  -->
+	<insert id="insert">
+		<![CDATA[
+			insert into tbl_wine
+			values (#{wine_code}, #{wine_name}, #{wine_img}, #{wine_thumbimg}, #{wine_type}, #{wine_price}, #{wine_stock}, sysdate, #{wine_info}, 0)
+		]]>
+	</insert>
+	
+	<!--상품 목록  -->
+	<select id="getAmount" resultType="Integer">
+		select count(wine_code) from tbl_wine	
+	</select>
+	<select id="getListpage" resultType="ca.project.DTO.WineDTO">
+		<![CDATA[
+			select rownum, 
+			wine_code, wine_name, wine_img, wine_thumbimg, wine_type, wine_price, wine_stock, to_char(wine_regdate, 'yyyy/mm/dd') wine_regdate, wine_info, wine_readcnt 
+			from (select * from tbl_wine order by wine_regdate asc) order by rownum desc
+		]]>
+	</select>
+	
+	<!-- select list  -->
+	<select id="getSelectAmount" resultType="Integer">
+		select count(wine_type) from tbl_wine where wine_type = #{wine_type}	
+	</select>
+	<select id="getSelectListpage" resultType="ca.project.DTO.WineDTO">
+		<![CDATA[
+			select rownum, 
+			wine_code, wine_name, wine_img, wine_thumbimg, 
+			wine_type, wine_price, wine_stock, 
+			to_char(wine_regdate, 'yyyy/mm/dd') wine_regdate, 
+			wine_info, wine_readcnt 
+			from (select * from tbl_wine order by wine_regdate asc) 
+			where wine_type = #{wine_type}
+			order by rownum desc 
+		]]>
+	</select>
+
+	<!-- search -->
+	<select id="search" resultType="ca.project.DTO.WineDTO" parameterType="String">
+		select * from tbl_wine where wine_name like '%'||#{content}||'%' or wine_info like '%'||#{content}||'%'
+	</select>
+	
+	<select id="getSearchAmount" resultType="Integer" parameterType="String">
+		select count(wine_type) from tbl_wine where wine_name like '%'||#{content}||'%' or wine_info like '%'||#{content}||'%'
+	</select>
+	
+	<!--상품정보 자세히 보기  -->
+	<select id="read" resultType="ca.project.DTO.WineDTO">
+		select * from tbl_wine where wine_code = #{wine_code}
+	</select>
+	<!--조회수 증가  -->
+	<update id="updateWine_readcnt">
+		update tbl_wine
+		set wine_readcnt = wine_readcnt + 1
+		where wine_code = #{wine_code}
+	</update>
+	
+	<!--상품정보 수정하기  -->
+	<update id="update">
+		<![CDATA[
+			update tbl_wine 
+			set wine_name=#{wine_name}, wine_type=#{wine_type}, wine_price=#{wine_price}, wine_stock=#{wine_stock}, wine_info=#{wine_info}, wine_regdate = sysdate, wine_img=#{wine_img}, wine_thumbimg=#{wine_thumbimg}
+			where wine_code = #{wine_code}
+		]]>
+	</update>
+	
+	<!--상품 삭제  -->
+	<delete id="delete">
+		delete from tbl_wine where wine_code = #{wine_code}
+	</delete>
+	
+
+	
+</mapper>

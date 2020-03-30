@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.Q_board">
+
+	<select id="getAmount" resultType="Integer">
+		select count(qb_no) from tbl_qnaboard	
+	</select>
+	
+	<select id="list" resultType="ca.project.DTO.Q_boardVO">
+		select * from tbl_qnaboard order by qb_root desc, qb_step asc
+	</select>
+	
+	<insert id="insert">
+		insert into tbl_qnaboard(qb_no, qb_writer, qb_title, qb_content) 
+		values((select nvl(max(qb_no), 0)+1 from tbl_qnaboard), #{qb_writer}, #{qb_title}, #{qb_content})
+		<selectKey keyProperty="qb_no" resultType="Integer" order="AFTER">
+			select max(qb_no) from tbl_qnaboard
+		</selectKey>
+	</insert>
+	
+	<update id="rootUpdate">
+		update tbl_qnaboard set qb_root=qb_no where qb_no=#{qb_no}
+	</update>
+	
+	<select id="read" resultType="ca.project.DTO.Q_boardVO">
+		select * from tbl_qnaboard where qb_no = #{qb_no}
+	</select>
+	
+	<update id="cntUpdate">
+		update tbl_qnaboard set qb_readcnt=qb_readcnt+1 where qb_no=#{qb_no}
+	</update>
+		
+	<update id="update">
+		update tbl_qnaboard set qb_title=#{qb_title}, qb_content=#{qb_content}, qb_updatedate=sysdate where qb_no=#{qb_no}
+	</update>
+	
+	<delete id="delete">
+		delete from tbl_qnaboard where qb_no=#{qb_no}
+	</delete>
+	
+	<update id="replyUpdate">
+		update tbl_qnaboard set qb_root=#{parent_qb_root}, qb_step=#{parent_qb_step}+1, qb_indent=#{parent_qb_indent}+1 where qb_no=#{qb_no}
+	</update>
+	
+	<update id="stepUpdate">
+		update tbl_qnaboard set qb_step=qb_step+1 where qb_root=#{parent_qb_root} and qb_step>#{parent_qb_step}
+	</update>
+	
+	
+</mapper>

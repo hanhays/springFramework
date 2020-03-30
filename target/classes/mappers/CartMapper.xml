@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ca.project.Cart">
+	
+	<!--장바구니 담기  -->
+	<insert id="insert">
+		insert into tbl_cart(cart_no, cart_memId, cart_wineCode, cart_amount, cart_regdate)
+		values((select NVL2(max(cart_no), max(cart_no)+1, 1) from tbl_cart), 
+		#{cart_memId}, #{cart_wineCode}, #{cart_amount}, sysdate)
+	</insert>
+	
+	<!--장바구니 목록  -->
+	<select id="list" resultType="ca.project.DTO.CartVO">
+		select
+		    c.cart_no, c.cart_memId, c.cart_wineCode, cart_amount, c.cart_regdate,
+		    w.wine_name, w.wine_thumbimg, w.wine_price, w.wine_stock
+		from tbl_cart c
+		    inner join tbl_wine w
+		        on c.cart_wineCode = w.wine_code    
+		    where c.cart_memId = #{mem_id} 
+		    order by c.cart_no asc
+	</select>
+	
+	
+	<!-- 장바구니 삭제 -->
+	<delete id="delete">
+		delete from tbl_cart where cart_no = #{cart_no}
+	</delete>
+	
+	
+	
+</mapper>
